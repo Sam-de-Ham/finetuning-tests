@@ -7,7 +7,7 @@ dataset = load_dataset("trl-lib/tldr", split="train")
 def reward_len(completions, **kwargs):
     return [-abs(20 - len(completion)) for completion in completions]
 
-training_args = GRPOConfig(output_dir="Qwen2-0.5B-GRPO", logging_steps=10)
+training_args = GRPOConfig(output_dir="Qwen-Distill-1.5B-GRPO", logging_steps=10)
 trainer = GRPOTrainer(
     model="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
     reward_funcs=reward_len,
