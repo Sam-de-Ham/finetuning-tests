@@ -20,6 +20,8 @@ trainer = GRPOTrainer(
     train_dataset=dataset,
 )
 
+trainer.model.device_map = "auto"
+
 
 for name, module in trainer.model.named_modules():
     print(f"name='{name}'")
