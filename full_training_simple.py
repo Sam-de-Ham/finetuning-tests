@@ -2,7 +2,7 @@
 
 from datasets import load_dataset
 from trl import GRPOConfig, GRPOTrainer
-import accelerator
+from accelerate import Accelerator
 
 dataset = load_dataset("trl-lib/tldr", split="train")
 
