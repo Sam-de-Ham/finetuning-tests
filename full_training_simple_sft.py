@@ -20,12 +20,13 @@ training_args = SFTConfig(output_dir="Qwen-Distill-1.5B-GRPO")
 #     train_dataset=dataset,
 # )
 
-trainer = SFTTrainer(
-    "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    train_dataset=dataset,
-    args=training_args,
+trainer = Accelerator().prepare(
+    SFTTrainer(
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+        train_dataset=dataset,
+        args=training_args,
+    )
 )
 
-trainer.model = accelerator.prepare(trainer.model)
 
 trainer.train()
