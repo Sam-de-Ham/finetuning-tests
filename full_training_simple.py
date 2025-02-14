@@ -2,6 +2,7 @@
 
 from datasets import load_dataset
 from trl import GRPOConfig, GRPOTrainer
+import accelerator
 
 dataset = load_dataset("trl-lib/tldr", split="train")
 
@@ -18,4 +19,7 @@ trainer = GRPOTrainer(
     args=training_args,
     train_dataset=dataset,
 )
+
+trainer.model = accelerator.prepare(trainer.model)
+
 trainer.train()
