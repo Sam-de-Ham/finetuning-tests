@@ -14,7 +14,7 @@ def reward_len(completions, **kwargs):
 
 training_args = GRPOConfig(output_dir="Qwen-Distill-1.5B-GRPO", logging_steps=10)
 trainer = GRPOTrainer(
-    model="Qwen/Qwen2-0.5B",
+    model="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
     reward_funcs=reward_len,
     args=training_args,
     train_dataset=dataset,
