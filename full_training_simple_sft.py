@@ -2,7 +2,7 @@ from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from accelerate import Accelerator
-from accelerate.utils import set_seed
+from accelerate.utils import set_seed, FullyShardedDataParallelPlugin
 import torch
 
 
@@ -11,16 +11,15 @@ def main():
     accelerator = Accelerator(
         gradient_accumulation_steps=4,
         mixed_precision="bf16",
-        # Configure FSDP for model sharding across GPUs
-        fsdp_config={
-            "fsdp_auto_wrap_policy": "TRANSFORMER_BASED_WRAP",
-            "fsdp_transformer_layer_cls_to_wrap": "Qwen2DecoderLayer",  # Updated to match model architecture
-            "fsdp_backward_prefetch": "BACKWARD_PRE",
-            "fsdp_state_dict_type": "SHARDED_STATE_DICT",
-            "fsdp_cpu_ram_efficient_loading": True,
-            "fsdp_sync_module_states": True,
-            "fsdp_use_orig_params": True,
-        },
+        fsdp_plugin=FullyShardedDataParallelPlugin(
+            auto_wrap_policy="TRANSFORMER_BASED_WRAP",
+            transformer_layer_cls_to_wrap="Qwen2DecoderLayer",  # Updated to match model architecture
+            backward_prefetch="BACKWARD_PRE",
+            state_dict_type="SHARDED_STATE_DICT",
+            cpu_ram_efficient_loading=True,
+            sync_module_states=True,
+            use_orig_params=True,
+        ),
     )
 
     # Set random seed for reproducibility
