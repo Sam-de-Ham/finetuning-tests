@@ -12,6 +12,10 @@ pip install trl datasets torch deepspeed
 
 git clone https://github.com/Sam-de-Ham/finetuning-tests.git
 
+## Other important directories and commands
+
 /workspace/finetuning-tests/ds_config.json
 
 /root/.cache/huggingface/accelerate/default_config.yaml
+
+accelerate launch --config_file ./accelerate_config.yaml full_training_simple_sft.py
