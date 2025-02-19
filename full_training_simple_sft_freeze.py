@@ -78,7 +78,7 @@ def main():
     # Unfreeze only whitelisted layers
     unfrozen_count = 0
     for name, param in model.named_parameters():
-        if any(pattern in name for pattern in whitelist_layer_patterns):
+        if any(name.startswith(pattern) for pattern in whitelist_layer_patterns):
             if param.dtype in [torch.float16, torch.float32, torch.bfloat16]:
                 param.requires_grad = True
                 unfrozen_count += 1
