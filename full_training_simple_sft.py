@@ -9,7 +9,7 @@ from accelerate.utils import DummyOptim, DummyScheduler
 
 
 def main():
-    # Initialize accelerator
+    # Initialize accelerator with DeepSpeed plugin
     accelerator = Accelerator()
 
     # Load dataset
@@ -26,7 +26,7 @@ def main():
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    # Configure training arguments
+    # Configure training arguments with absolute path to DeepSpeed config
     training_args = SFTConfig(
         output_dir=f"{model_name}_finetuned",
         max_seq_length=2048,
@@ -38,7 +38,7 @@ def main():
         bf16=True,
         ddp_find_unused_parameters=False,
         gradient_checkpointing=True,
-        deepspeed="ds_config.json",  # Add DeepSpeed config
+        deepspeed="./ds_config.json",  # Use relative path
     )
 
     # Initialize trainer with accelerator
