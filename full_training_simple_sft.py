@@ -1,5 +1,3 @@
-# requires: datasets trl accelerate deepspeed
-
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer
 from accelerate import Accelerator
