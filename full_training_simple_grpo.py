@@ -54,7 +54,6 @@ def main():
     )
     trainer = GRPOTrainer(
         model=model,
-        tokenizer=tokenizer,
         reward_funcs=reward_len,
         args=training_args,
         train_dataset=dataset,
