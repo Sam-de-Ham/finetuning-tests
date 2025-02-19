@@ -18,4 +18,4 @@ git clone https://github.com/Sam-de-Ham/finetuning-tests.git
 
 /root/.cache/huggingface/accelerate/default_config.yaml
 
-accelerate launch --config_file ./accelerate_config.yaml full_training_simple_sft.py
+accelerate launch --config_file ./accelerate.yaml full_training_simple_sft.py
