@@ -6,7 +6,7 @@ apt update -y && sudo apt upgrade -y && sudo apt-get install -y pkg-config pytho
 
 ## Get python libraries
 
-pip install trl datasets torch
+pip install trl datasets torch deepspeed
 
 ## Clone repo
 
