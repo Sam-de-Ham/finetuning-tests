@@ -16,7 +16,7 @@ def main():
 
     # Load base model and tokenizer
     # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-    model_name = "Qwen/Qwen2-0.5B"
+    model_name = "meta-llama/Llama-3.2-1B"
 
     # Initialize model with no device map for DeepSpeed compatibility
     model = AutoModelForCausalLM.from_pretrained(
