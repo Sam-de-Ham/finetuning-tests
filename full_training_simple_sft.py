@@ -1,24 +1,26 @@
 from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from accelerate import Accelerator
-from accelerate.utils import set_seed, FullyShardedDataParallelPlugin
+from accelerate import Accelerator, FullyShardedDataParallelPlugin
+from accelerate.utils import set_seed
 import torch
 
 
 def main():
-    # Initialize accelerator
+    # Initialize accelerator with FSDP plugin for memory-efficient multi-GPU training
+    fsdp_plugin = FullyShardedDataParallelPlugin(
+        auto_wrap_policy={"transformer_layer_cls": "Qwen2DecoderLayer"},
+        backward_prefetch="BACKWARD_PRE",
+        state_dict_type="SHARDED_STATE_DICT",
+        cpu_offload=True,  # Offload parameters to CPU when not in use
+        sync_module_states=True,
+        param_init_fn=None,
+    )
+
     accelerator = Accelerator(
         gradient_accumulation_steps=4,
-        mixed_precision="bf16",
-        fsdp_plugin=FullyShardedDataParallelPlugin(
-            auto_wrap_policy={"transformer_layer_cls": "Qwen2DecoderLayer"},
-            backward_prefetch="BACKWARD_PRE",
-            state_dict_type="SHARDED_STATE_DICT",
-            cpu_offload=True,
-            sync_module_states=True,
-            param_init_fn=None,
-        ),
+        mixed_precision="bf16",  # Use bfloat16 for better memory efficiency
+        fsdp_plugin=fsdp_plugin,
     )
 
     # Set random seed for reproducibility
@@ -29,10 +31,12 @@ def main():
 
     # Load base model and tokenizer
     model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+
+    # Initialize model with mixed precision
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16,
-        use_cache=False,  # Important for training with FSDP
+        use_cache=False,  # Disable KV cache for training
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -47,25 +51,32 @@ def main():
         fp16=False,
         bf16=True,
         ddp_find_unused_parameters=False,
-        gradient_checkpointing=True,
+        gradient_checkpointing=True,  # Enable gradient checkpointing for memory efficiency
     )
 
-    # Prepare model with accelerator
-    model = accelerator.prepare(model)
-
-    # Initialize trainer
+    # Initialize trainer with prepared model
     trainer = SFTTrainer(
         model=model,
-        tokenizer=tokenizer,
-        train_dataset=dataset,
         args=training_args,
+        train_dataset=dataset,
+        tokenizer=tokenizer,
     )
 
-    # Start training
-    trainer.train()
+    # Prepare the trainer with accelerator
+    trainer = accelerator.prepare(trainer)
 
-    # Save the final model
-    trainer.save_model()
+    # Start training
+    with accelerator.main_process_first():
+        trainer.train()
+
+    # Save the final model - only on the main process
+    if accelerator.is_main_process:
+        # Get unwrapped model
+        unwrapped_model = accelerator.unwrap_model(trainer.model)
+        # Save using accelerator's save function
+        accelerator.save(
+            unwrapped_model.state_dict(), f"{training_args.output_dir}/final_model.pt"
+        )
 
 
 if __name__ == "__main__":
