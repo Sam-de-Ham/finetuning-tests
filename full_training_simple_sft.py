@@ -6,8 +6,11 @@ from accelerate.utils import set_seed
 from accelerate.logging import get_logger
 import torch
 import os
+import logging
 
-logger = get_logger(__name__, log_level="DEBUG")
+# Initialize basic logging first
+basic_logger = logging.getLogger(__name__)
+basic_logger.setLevel(logging.DEBUG)
 
 # Add at the top of the file
 os.environ["NCCL_TIMEOUT"] = "120"  # 30 minutes instead of default 10
@@ -16,7 +19,7 @@ os.environ["NCCL_DEBUG"] = "INFO"  # Enable NCCL debugging
 
 def main():
     try:
-        # Initialize accelerator with modified FSDP plugin
+        # Initialize accelerator first
         fsdp_plugin = FullyShardedDataParallelPlugin(
             auto_wrap_policy={"transformer_layer_cls": "Qwen2DecoderLayer"},
             backward_prefetch="BACKWARD_PRE",
@@ -26,14 +29,16 @@ def main():
             param_init_fn=None,
         )
 
-        # Add logging statements
-        logger.debug("Initializing accelerator")
+        basic_logger.debug("Initializing accelerator")
         accelerator = Accelerator(
             gradient_accumulation_steps=4,
             mixed_precision="bf16",  # Use bfloat16 for better memory efficiency
             fsdp_plugin=fsdp_plugin,
             log_with="all",  # Enable logging
         )
+
+        # Now we can get and use the accelerate logger
+        logger = get_logger(__name__, log_level="DEBUG")
 
         # Set random seed for reproducibility
         set_seed(42)
@@ -91,7 +96,7 @@ def main():
             )
 
     except Exception as e:
-        logger.error(f"Training failed with error: {str(e)}")
+        basic_logger.error(f"Training failed with error: {str(e)}")
         raise
 
 
