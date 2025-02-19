@@ -2,7 +2,7 @@ from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from accelerate import Accelerator
-from accelerate.utils import set_seed, FullyShardedDataParallelPlugin
+from accelerate.utils import set_seed
 import torch
 
 
@@ -12,13 +12,12 @@ def main():
         gradient_accumulation_steps=4,
         mixed_precision="bf16",
         fsdp_plugin=FullyShardedDataParallelPlugin(
-            auto_wrap_policy="TRANSFORMER_BASED_WRAP",
-            transformer_layer_cls_to_wrap="Qwen2DecoderLayer",  # Updated to match model architecture
+            auto_wrap_policy={"transformer_layer_cls": "Qwen2DecoderLayer"},
             backward_prefetch="BACKWARD_PRE",
             state_dict_type="SHARDED_STATE_DICT",
-            cpu_ram_efficient_loading=True,
+            cpu_offload=False,
             sync_module_states=True,
-            use_orig_params=True,
+            param_init_fn=None,
         ),
     )
 
