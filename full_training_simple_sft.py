@@ -9,6 +9,8 @@ from torch.distributed.fsdp.fully_sharded_data_parallel import (
     FullOptimStateDictConfig,
     FullStateDictConfig,
 )
+from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
+from transformers.models.qwen.modeling_qwen import QWenBlock
 import torch
 import datetime
 
@@ -18,6 +20,7 @@ fsdp_plugin = FullyShardedDataParallelPlugin(
     optim_state_dict_config=FullOptimStateDictConfig(
         offload_to_cpu=True, rank0_only=True
     ),
+    auto_wrap_policy=transformer_auto_wrap_policy(transformer_layer_cls={QWenBlock}),
 )
 
 # Initialize accelerator with FSDP settings
