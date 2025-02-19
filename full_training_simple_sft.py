@@ -9,10 +9,7 @@ from torch.distributed.fsdp.fully_sharded_data_parallel import (
     FullOptimStateDictConfig,
     FullStateDictConfig,
 )
-from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
-from transformers.models.qwen.modeling_qwen import QWenBlock
 import torch
-import datetime
 
 # Initialize FSDP Plugin with proper configuration
 fsdp_plugin = FullyShardedDataParallelPlugin(
@@ -20,7 +17,8 @@ fsdp_plugin = FullyShardedDataParallelPlugin(
     optim_state_dict_config=FullOptimStateDictConfig(
         offload_to_cpu=True, rank0_only=True
     ),
-    auto_wrap_policy=transformer_auto_wrap_policy(transformer_layer_cls={QWenBlock}),
+    auto_wrap_policy="TRANSFORMER_BASED_WRAP",
+    transformer_layer_cls_to_wrap="QWenBlock",  # DeepSeek uses QWen architecture
 )
 
 # Initialize accelerator with FSDP settings
@@ -44,7 +42,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # Configure training arguments
 training_args = SFTConfig(
-    output_dir="Qwen-Distill-1.5B-GRPO",
+    output_dir=f"{model_name}_GRPO_tuned",
     max_seq_length=2048,
     per_device_train_batch_size=1,  # Reduced batch size as model is sharded
     gradient_accumulation_steps=4,
