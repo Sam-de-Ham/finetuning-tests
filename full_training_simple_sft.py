@@ -2,7 +2,7 @@ from datasets import load_dataset
 from trl import SFTConfig, SFTTrainer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from accelerate import Accelerator
-from accelerate.utils import set_seed
+from accelerate.utils import set_seed, FullyShardedDataParallelPlugin
 import torch
 
 
