@@ -7,23 +7,34 @@ from accelerate.utils import DummyOptim, DummyScheduler
 
 
 def print_total_parameters(model):
+    """Count and print the total number of parameters in the model."""
     total_params = sum(p.numel() for p in model.parameters())
-    print(f"Total parameters in the original model: {total_params}")
+    total_params_millions = total_params / 1_000_000
+    print(f"Total parameters: {total_params:,} (~{total_params_millions:.2f}M)")
     return total_params
 
 
 def print_trainable_parameters(model):
+    """Count and print trainable vs total parameters in the model."""
     trainable_params = 0
-    all_param = 0
-    for _, param in model.named_parameters():
+    total_params = 0
+
+    # Iterate through all parameters
+    for name, param in model.named_parameters():
         num_params = param.numel()
-        all_param += num_params
+        total_params += num_params
         if param.requires_grad:
+            print(f"Trainable layer: {name} ({num_params:,} parameters)")
             trainable_params += num_params
-    print(
-        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param:.2f}"
-    )
-    return trainable_params, all_param
+
+    trainable_percent = 100 * trainable_params / total_params if total_params > 0 else 0
+
+    print(f"\nModel Summary:")
+    print(f"Trainable parameters: {trainable_params:,}")
+    print(f"Total parameters: {total_params:,}")
+    print(f"Trainable parameters percentage: {trainable_percent:.2f}%")
+
+    return trainable_params, total_params
 
 
 def main():
@@ -50,8 +61,8 @@ def main():
     total_params = print_total_parameters(model)
 
     # Print layer names if needed
-    for name, module in model.named_modules():
-        print(f"name='{name}'")
+    # for name, module in model.named_modules():
+    #     print(f"name='{name}'")
 
     whitelist_layer_patterns = [
         "model.embed_tokens",  # Embedding layer - ALWAYS trainable - very big
@@ -60,26 +71,25 @@ def main():
         "lm_head",  # Language Model Head - ALWAYS trainable - very big
     ]
 
-    # Freeze all parameters EXCEPT those in the whitelist
-    for n, p in model.named_parameters():
-        p.requires_grad = False  # Freeze all layers by default
-        for layer_pattern in whitelist_layer_patterns:
-            if (
-                layer_pattern in n
-            ):  # Check if the current layer name matches any whitelist pattern
-                if p.dtype in [
-                    torch.float16,
-                    torch.float32,
-                    torch.bfloat16,
-                    torch.complex64,
-                    torch.complex128,
-                ]:
-                    p.requires_grad = (
-                        True  # Unfreeze if it's in the whitelist AND it's a float type
-                    )
-                break
+    # Freeze all parameters first
+    for param in model.parameters():
+        param.requires_grad = False
 
-    # Print trainable parameters after freezing
+    # Unfreeze only whitelisted layers
+    unfrozen_count = 0
+    for name, param in model.named_parameters():
+        if any(pattern in name for pattern in whitelist_layer_patterns):
+            if param.dtype in [torch.float16, torch.float32, torch.bfloat16]:
+                param.requires_grad = True
+                unfrozen_count += 1
+                print(f"Unfrozen layer: {name}")
+
+    print(f"\nUnfrozen {unfrozen_count} parameter groups based on whitelist")
+
+    # Print parameter statistics
+    print("\nInitial parameter counts:")
+    total_params = print_total_parameters(model)
+    print("\nTrainable parameter analysis:")
     trainable_params, all_params = print_trainable_parameters(model)
 
     # Configure training arguments with absolute path to DeepSpeed config
