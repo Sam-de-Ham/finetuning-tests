@@ -38,7 +38,7 @@ def main():
         bf16=True,
         ddp_find_unused_parameters=False,
         gradient_checkpointing=True,
-        deepspeed="./ds_config.json",  # Use relative path
+        deepspeed="/workspace/finetuning-tests/ds_config.json",  # Use relative path
     )
 
     # Initialize trainer with accelerator
