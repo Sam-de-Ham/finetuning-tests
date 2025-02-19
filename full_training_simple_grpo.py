@@ -60,14 +60,6 @@ def main():
         train_dataset=dataset,
     )
 
-    # Initialize trainer with accelerator
-    trainer = SFTTrainer(
-        model=model,
-        tokenizer=tokenizer,
-        train_dataset=dataset,
-        args=training_args,
-    )
-
     # Prepare the trainer with accelerator
     trainer = accelerator.prepare(trainer)
 
