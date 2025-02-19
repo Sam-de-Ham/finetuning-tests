@@ -11,3 +11,7 @@ pip install trl datasets torch deepspeed
 ## Clone repo
 
 git clone https://github.com/Sam-de-Ham/finetuning-tests.git
+
+/workspace/finetuning-tests/ds_config.json
+
+/root/.cache/huggingface/accelerate/default_config.yaml

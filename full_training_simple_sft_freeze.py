@@ -6,6 +6,26 @@ import torch
 from accelerate.utils import DummyOptim, DummyScheduler
 
 
+def print_total_parameters(model):
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f"Total parameters in the original model: {total_params}")
+    return total_params
+
+
+def print_trainable_parameters(model):
+    trainable_params = 0
+    all_param = 0
+    for _, param in model.named_parameters():
+        num_params = param.numel()
+        all_param += num_params
+        if param.requires_grad:
+            trainable_params += num_params
+    print(
+        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param:.2f}"
+    )
+    return trainable_params, all_param
+
+
 def main():
     # Initialize accelerator with DeepSpeed plugin
     accelerator = Accelerator()
@@ -25,16 +45,12 @@ def main():
         torch_dtype=torch.bfloat16,
     )
 
+    # Print initial parameter count
+    total_params = print_total_parameters(model)
+
+    # Print layer names if needed
     for name, module in model.named_modules():
         print(f"name='{name}'")
-
-    def print_total_parameters(model):
-        all_param = 0
-        for _, param in model.named_parameters():
-            all_param += param.numel()
-        print(f"Total parameters in the original model: {all_param}")
-
-    print_total_parameters(model)
 
     whitelist_layer_patterns = [
         "model.embed_tokens",  # Embedding layer - ALWAYS trainable - very big
@@ -56,25 +72,14 @@ def main():
                     torch.bfloat16,
                     torch.complex64,
                     torch.complex128,
-                ]:  # ADDED dtype check!
+                ]:
                     p.requires_grad = (
                         True  # Unfreeze if it's in the whitelist AND it's a float type
                     )
-                break  # No need to check other patterns if already whitelisted
+                break
 
-    # Verification - Count trainable parameters. Should be significantly less than full model.
-    def print_trainable_parameters(model):
-        trainable_params = 0
-        all_param = 0
-        for _, param in model.named_parameters():
-            all_param += param.numel()
-            if param.requires_grad:
-                trainable_params += param.numel()
-        print(
-            f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
-        )
-
-    print_trainable_parameters(model)
+    # Print trainable parameters after freezing
+    trainable_params, all_params = print_trainable_parameters(model)
 
     # Configure training arguments with absolute path to DeepSpeed config
     training_args = SFTConfig(
