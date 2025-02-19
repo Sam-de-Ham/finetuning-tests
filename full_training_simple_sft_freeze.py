@@ -17,24 +17,27 @@ def print_total_parameters(model):
 def print_trainable_parameters(model):
     """Count and print trainable vs total parameters in the model."""
     trainable_params = 0
-    total_params = 0
+    all_params = 0
 
-    # Iterate through all parameters
-    for name, param in model.named_parameters():
-        num_params = param.numel()
-        total_params += num_params
-        if param.requires_grad:
-            print(f"Trainable layer: {name} ({num_params:,} parameters)")
-            trainable_params += num_params
+    for module_name, module in model.named_modules():
+        for param_name, param in module.named_parameters(recurse=False):
+            full_param_name = (
+                f"{module_name}.{param_name}" if module_name else param_name
+            )
+            num_params = param.numel()
+            all_params += num_params
+            if param.requires_grad:
+                print(f"Trainable layer: {full_param_name} ({num_params:,} parameters)")
+                trainable_params += num_params
 
-    trainable_percent = 100 * trainable_params / total_params if total_params > 0 else 0
+    trainable_percent = 100 * trainable_params / all_params if all_params > 0 else 0
 
     print(f"\nModel Summary:")
     print(f"Trainable parameters: {trainable_params:,}")
-    print(f"Total parameters: {total_params:,}")
+    print(f"Total parameters: {all_params:,}")
     print(f"Trainable parameters percentage: {trainable_percent:.2f}%")
 
-    return trainable_params, total_params
+    return trainable_params, all_params
 
 
 def main():
@@ -72,17 +75,19 @@ def main():
     ]
 
     # Freeze all parameters first
-    for param in model.parameters():
-        param.requires_grad = False
+    for module_name, module in model.named_modules():
+        for param_name, param in module.named_parameters(recurse=False):
+            param.requires_grad = False
 
     # Unfreeze only whitelisted layers
     unfrozen_count = 0
-    for name, param in model.named_parameters():
-        if any(name.startswith(pattern) for pattern in whitelist_layer_patterns):
-            if param.dtype in [torch.float16, torch.float32, torch.bfloat16]:
-                param.requires_grad = True
-                unfrozen_count += 1
-                print(f"Unfrozen layer: {name}")
+    for module_name, module in model.named_modules():
+        if any(module_name.startswith(pattern) for pattern in whitelist_layer_patterns):
+            for param_name, param in module.named_parameters(recurse=False):
+                if param.dtype in [torch.float16, torch.float32, torch.bfloat16]:
+                    param.requires_grad = True
+                    unfrozen_count += 1
+                    print(f"Unfrozen layer: {module_name}.{param_name}")
 
     print(f"\nUnfrozen {unfrozen_count} parameter groups based on whitelist")
 
