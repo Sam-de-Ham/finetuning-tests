@@ -15,7 +15,7 @@ def main():
             auto_wrap_policy={"transformer_layer_cls": "Qwen2DecoderLayer"},
             backward_prefetch="BACKWARD_PRE",
             state_dict_type="SHARDED_STATE_DICT",
-            cpu_offload=False,
+            cpu_offload=True,
             sync_module_states=True,
             param_init_fn=None,
         ),
@@ -50,13 +50,15 @@ def main():
         gradient_checkpointing=True,
     )
 
-    # Initialize trainer with accelerator
+    # Prepare model with accelerator
+    model = accelerator.prepare(model)
+
+    # Initialize trainer
     trainer = SFTTrainer(
         model=model,
         tokenizer=tokenizer,
         train_dataset=dataset,
         args=training_args,
-        accelerator=accelerator,
     )
 
     # Start training
