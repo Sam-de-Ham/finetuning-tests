@@ -25,30 +25,7 @@ def main():
         torch_dtype=torch.bfloat16,
     )
 
-    # Configure training arguments with absolute path to DeepSpeed config
-    training_args = SFTConfig(
-        output_dir=f"{model_name}_finetuned",
-        max_seq_length=2048,
-        per_device_train_batch_size=1,
-        gradient_accumulation_steps=2,
-        learning_rate=2e-5,
-        num_train_epochs=3,
-        fp16=False,
-        bf16=True,
-        ddp_find_unused_parameters=False,
-        gradient_checkpointing=True,
-        deepspeed="/workspace/finetuning-tests/ds_config.json",  # Use relative path
-    )
-
-    # Initialize trainer with accelerator
-    trainer = SFTTrainer(
-        model=model,
-        tokenizer=tokenizer,
-        train_dataset=dataset,
-        args=training_args,
-    )
-
-    for name, module in trainer.model.named_modules():
+    for name, module in model.named_modules():
         print(f"name='{name}'")
 
     def print_total_parameters(model):
@@ -57,7 +34,7 @@ def main():
             all_param += param.numel()
         print(f"Total parameters in the original model: {all_param}")
 
-    print_total_parameters(trainer.model)
+    print_total_parameters(model)
 
     whitelist_layer_patterns = [
         "model.embed_tokens",  # Embedding layer - ALWAYS trainable - very big
@@ -67,7 +44,7 @@ def main():
     ]
 
     # Freeze all parameters EXCEPT those in the whitelist
-    for n, p in trainer.model.named_parameters():
+    for n, p in model.named_parameters():
         p.requires_grad = False  # Freeze all layers by default
         for layer_pattern in whitelist_layer_patterns:
             if (
@@ -97,7 +74,30 @@ def main():
             f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
         )
 
-    print_trainable_parameters(trainer.model)
+    print_trainable_parameters(model)
+
+    # Configure training arguments with absolute path to DeepSpeed config
+    training_args = SFTConfig(
+        output_dir=f"{model_name}_finetuned",
+        max_seq_length=2048,
+        per_device_train_batch_size=1,
+        gradient_accumulation_steps=2,
+        learning_rate=2e-5,
+        num_train_epochs=3,
+        fp16=False,
+        bf16=True,
+        ddp_find_unused_parameters=False,
+        gradient_checkpointing=True,
+        deepspeed="/workspace/finetuning-tests/ds_config.json",  # Use relative path
+    )
+
+    # Initialize trainer with accelerator
+    trainer = SFTTrainer(
+        model=model,
+        tokenizer=tokenizer,
+        train_dataset=dataset,
+        args=training_args,
+    )
 
     # Prepare the trainer with accelerator
     trainer = accelerator.prepare(trainer)
