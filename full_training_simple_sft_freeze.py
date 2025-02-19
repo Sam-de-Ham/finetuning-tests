@@ -23,7 +23,7 @@ def main():
         torch_dtype=torch.bfloat16,
     )
 
-    for name, module in trainer.model.named_modules():
+    for name, module in model.named_modules():
         print(f"name='{name}'")
 
     def print_total_parameters(model):
@@ -32,7 +32,7 @@ def main():
             all_param += param.numel()
         print(f"Total parameters in the original model: {all_param}")
 
-    print_total_parameters(trainer.model)
+    print_total_parameters(model)
 
     whitelist_layer_patterns = [
         "model.embed_tokens",  # Embedding layer - ALWAYS trainable - very big
@@ -42,7 +42,7 @@ def main():
     ]
 
     # Freeze all parameters EXCEPT those in the whitelist
-    for n, p in trainer.model.named_parameters():
+    for n, p in model.named_parameters():
         p.requires_grad = False  # Freeze all layers by default
         for layer_pattern in whitelist_layer_patterns:
             if (
@@ -72,7 +72,7 @@ def main():
             f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
         )
 
-    print_trainable_parameters(trainer.model)
+    print_trainable_parameters(model)
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
