@@ -32,6 +32,7 @@ def main():
 
     # Load dataset
     dataset = load_dataset("trl-lib/tldr", split="train")
+    dataset = dataset.select(range(100))
 
     # Load base model and tokenizer
     model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
