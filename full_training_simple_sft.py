@@ -15,8 +15,8 @@ def main():
     dataset = dataset.select(range(100))
 
     # Load base model and tokenizer
-    # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-    model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+    # model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
     # Initialize model with no device map for DeepSpeed compatibility
     model = AutoModelForCausalLM.from_pretrained(
