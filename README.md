@@ -48,7 +48,11 @@ GRPO training information from trl - [link](https://huggingface.co/docs/trl/main
 
 # Data collected
 
-| Model       | Size | Type of training | Vram (GB) |
-| ----------- | ---- | ---------------- | --------- |
-| DeepSeek-R1 | 1.5B | SFT              | > 32      |
-| DeepSeek-R1 | 1.5B | GRPO             | 90-100    |
+| Model                                                         | Size | Type of training | Vram (GB) | Hardware | Speed   |
+| ------------------------------------------------------------- | ---- | ---------------- | --------- | -------- | ------- |
+| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 1.5B | SFT              | > 32      | 4x A4000 |         |
+| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 1.5B | GRPO             | 90-100    | 4x A4000 |         |
+| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 7b   | SFT              |           | 2x H200  | 1.5s/it |
+| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 7b   | GRPO             |           | 2x H200  | 33s/it  |
+| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 14b  | SFT              | 260       | 2x H200  | 2.7s/it |
+| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 12b  | GRPO             |           | 2x H200  |         |
