@@ -4,6 +4,7 @@ from accelerate import Accelerator
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 from accelerate.utils import DummyOptim, DummyScheduler
+from model_to_use import model_name
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
 
     # Load base model and tokenizer
     # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-    model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B"
+    # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B"
     # model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
     # Initialize model with no device map for DeepSpeed compatibility
