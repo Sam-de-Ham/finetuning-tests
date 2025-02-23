@@ -7,6 +7,7 @@ from accelerate.utils import DummyOptim, DummyScheduler
 from trl import GRPOConfig, GRPOTrainer
 from model_to_use import model_name
 from huggingface_hub import snapshot_download
+import os
 
 
 def main():
@@ -22,6 +23,7 @@ def main():
         # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B"
         # model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+        os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
         snapshot_download(repo_id=model_name)
 
         # Initialize model with no device map for DeepSpeed compatibility
