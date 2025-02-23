@@ -20,7 +20,7 @@ def main():
     # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
     # model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B"
     # model_name = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-    snapshot_download(repo_id=mode_name)
+    snapshot_download(repo_id=model_name)
 
     # Initialize model with no device map for DeepSpeed compatibility
     model = AutoModelForCausalLM.from_pretrained(
