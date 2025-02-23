@@ -4,7 +4,7 @@
 
 `apt update -y && apt upgrade -y && apt-get install -y pkg-config python3-dev default-libmysqlclient-dev build-essential`
 
-`pip install trl datasets torch deepspeed huggingface-cli hf_transfer`
+`pip install trl datasets torch deepspeed huggingface_hub`
 
 `git clone https://github.com/Sam-de-Ham/finetuning-tests.git`
 
