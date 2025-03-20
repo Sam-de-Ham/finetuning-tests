@@ -4,7 +4,7 @@
 
 `apt update -y && apt upgrade -y && apt-get install -y pkg-config python3-dev default-libmysqlclient-dev build-essential`
 
-`pip install trl datasets torch deepspeed huggingface_hub hf_transfer`
+`pip install trl datasets torch deepspeed huggingface_hub hf_transfer` (Remove torch for speed without freeze)
 
 `git clone https://github.com/Sam-de-Ham/finetuning-tests.git`
 
@@ -14,7 +14,7 @@ Use accelerate to run scripts to ensure proper multi-GPU usage
 
 Config for accelerate is passed as parameter, which then references the DeepSpeed config
 
-`accelerate launch --config_file ./accelerate.yaml full_training_simple_sft.py`
+`accelerate launch --config_file ./accelerate.yaml full_training_simple_grpo.py`
 
 ## Important settings
 
@@ -55,4 +55,4 @@ GRPO training information from trl - [link](https://huggingface.co/docs/trl/main
 | [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 7b   | SFT              |           | 2x H200  | 1.5s/it |
 | [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 7b   | GRPO             |           | 2x H200  | 33s/it  |
 | [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 14b  | SFT              | 260       | 2x H200  | 2.7s/it |
-| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 12b  | GRPO             |           | 2x H200  |         |
+| [DeepSeek-R1](https://huggingface.co/deepseek-ai/DeepSeek-R1) | 14b  | GRPO             | 466       | 2x H200  | 56s/it  |
